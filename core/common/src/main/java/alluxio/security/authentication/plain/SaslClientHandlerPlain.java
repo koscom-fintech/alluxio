@@ -55,6 +55,12 @@ public class SaslClientHandlerPlain extends AbstractSaslClientHandler {
       connectionUser = user.iterator().next().getName();
     }
 
+    // KOSCOM : add password
+    Set<String> passwordSet = subject.getPrivateCredentials(String.class);
+    if (passwordSet != null && !user.isEmpty()) {
+      password = passwordSet.iterator().next();
+    }
+
     // Determine the impersonation user
     String impersonationUser = AuthenticationUserUtils.getImpersonationUser(subject, conf);
 

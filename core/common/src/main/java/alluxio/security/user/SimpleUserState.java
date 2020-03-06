@@ -13,7 +13,10 @@ package alluxio.security.user;
 
 import alluxio.conf.AlluxioConfiguration;
 import alluxio.conf.PropertyKey;
+import alluxio.conf.PropertyKey.Builder;
+import alluxio.conf.PropertyKey.ConsistencyCheckLevel;
 import alluxio.exception.status.UnauthenticatedException;
+import alluxio.grpc.Scope;
 import alluxio.security.User;
 import alluxio.security.authentication.AuthType;
 import alluxio.security.login.AppLoginModule;
@@ -35,6 +38,13 @@ import javax.security.auth.login.LoginException;
 public class SimpleUserState extends BaseUserState {
   private static final Logger LOG = LoggerFactory.getLogger(SimpleUserState.class);
 
+  // KOSCOM : define user login password property key
+  public static final PropertyKey SECURITY_LOGIN_PASSWORD =
+                  new Builder("alluxio.security.login.password")
+                  .setConsistencyCheckLevel(ConsistencyCheckLevel.ENFORCE)
+                  .setScope(Scope.CLIENT)
+                  .build();
+
   /**
    * Factory class to create the user state.
    */
@@ -52,6 +62,12 @@ public class SimpleUserState extends BaseUserState {
 
   private SimpleUserState(Subject subject, AlluxioConfiguration conf) {
     super(subject, conf);
+
+    // KOSCOM : add private credential
+    if (mConf.isSet(SECURITY_LOGIN_PASSWORD)) {
+      String password = conf.get(SECURITY_LOGIN_PASSWORD);
+      mSubject.getPrivateCredentials().add(password);
+    }
   }
 
   @Override
